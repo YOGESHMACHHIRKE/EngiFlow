@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import type { Document, User, DocumentStatus } from '../types';
+import type { Document, User, DocumentStatus, Project, ReviewerRole } from '../types';
 import { DocumentCard } from './DocumentCard';
 import { SearchIcon } from './icons/SearchIcon';
 import { TagIcon } from './icons/TagIcon';
@@ -11,10 +11,13 @@ import { XCircleIcon } from './icons/XCircleIcon';
 import { ClockIcon } from './icons/ClockIcon';
 import { ArrowUpIcon } from './icons/ArrowUpIcon';
 import { ArrowDownIcon } from './icons/ArrowDownIcon';
+import { ProjectIcon } from './icons/ProjectIcon';
+import { CommentIcon } from './icons/CommentIcon';
 
 interface GlobalSearchProps {
   documents: Document[];
   users: User[];
+  projects: Project[];
   onSelectDocument: (docId: string) => void;
 }
 
@@ -30,17 +33,20 @@ const FilterSection: React.FC<{ title: string; icon: React.ReactNode; children: 
     </div>
 );
 
-export const GlobalSearch: React.FC<GlobalSearchProps> = ({ documents, users, onSelectDocument }) => {
+export const GlobalSearch: React.FC<GlobalSearchProps> = ({ documents, users, projects, onSelectDocument }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<DocumentStatus | 'All'>('All');
     const [typeFilter, setTypeFilter] = useState<string | 'All'>('All');
     const [uploaderFilter, setUploaderFilter] = useState<string | 'All'>('All');
     const [approverFilter, setApproverFilter] = useState<string | 'All'>('All');
+    const [reviewerRoleFilter, setReviewerRoleFilter] = useState<ReviewerRole | 'All'>('All');
+    const [projectCodeFilter, setProjectCodeFilter] = useState<string | 'All'>('All');
     const [startDateFilter, setStartDateFilter] = useState('');
     const [endDateFilter, setEndDateFilter] = useState('');
     const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
     
     const docTypes = useMemo(() => ['All', ...Array.from(new Set(documents.map(d => d.type.toUpperCase())))], [documents]);
+    const projectCodes = useMemo(() => ['All', ...Array.from(new Set(projects.map(p => p.projectCode)))], [projects]);
 
     const clearFilters = () => {
         setSearchQuery('');
@@ -48,6 +54,8 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ documents, users, on
         setTypeFilter('All');
         setUploaderFilter('All');
         setApproverFilter('All');
+        setReviewerRoleFilter('All');
+        setProjectCodeFilter('All');
         setStartDateFilter('');
         setEndDateFilter('');
         setSortBy('newest');
@@ -65,11 +73,17 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ documents, users, on
         if (typeFilter !== 'All') {
             filtered = filtered.filter(doc => doc.type.toUpperCase() === typeFilter);
         }
+        if (projectCodeFilter !== 'All') {
+            filtered = filtered.filter(doc => doc.projectCode === projectCodeFilter);
+        }
         if (uploaderFilter !== 'All') {
             filtered = filtered.filter(doc => doc.uploadedBy.email === uploaderFilter);
         }
         if (approverFilter !== 'All') {
             filtered = filtered.filter(doc => doc.reviewers.some(r => r.role === 'Approver' && r.email === approverFilter));
+        }
+        if (reviewerRoleFilter !== 'All') {
+            filtered = filtered.filter(doc => doc.reviewers.some(r => r.role === reviewerRoleFilter));
         }
         if (startDateFilter) {
             filtered = filtered.filter(doc => new Date(doc.uploadDate) >= new Date(startDateFilter));
@@ -85,7 +99,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ documents, users, on
             const dateB = new Date(b.uploadDate).getTime();
             return sortBy === 'newest' ? dateB - dateA : dateA - dateB;
         });
-    }, [documents, searchQuery, statusFilter, typeFilter, uploaderFilter, approverFilter, startDateFilter, endDateFilter, sortBy]);
+    }, [documents, searchQuery, statusFilter, typeFilter, uploaderFilter, approverFilter, reviewerRoleFilter, projectCodeFilter, startDateFilter, endDateFilter, sortBy]);
 
     const renderStatusButton = (status: DocumentStatus | 'All', label: string, icon: React.ReactNode) => (
         <button
@@ -110,7 +124,14 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ documents, users, on
                    {renderStatusButton('All', 'All Statuses', <div className="w-5 h-5 flex items-center justify-center"><div className="w-3 h-3 rounded-full bg-gray-400"></div></div>)}
                    {renderStatusButton('Approved', 'Approved', <CheckCircleIcon className="w-5 h-5 text-green-500" />)}
                    {renderStatusButton('In Review', 'In Review', <ClockIcon className="w-5 h-5 text-amber-500" />)}
+                   {renderStatusButton('Commented', 'Commented', <CommentIcon className="w-5 h-5 text-violet-500" />)}
                    {renderStatusButton('Rejected', 'Rejected', <XCircleIcon className="w-5 h-5 text-red-500" />)}
+                </FilterSection>
+
+                <FilterSection title="Project" icon={<ProjectIcon className="w-5 h-5" />}>
+                   <select value={projectCodeFilter} onChange={e => setProjectCodeFilter(e.target.value)} className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 focus:ring-blue-500 focus:border-blue-500">
+                       {projectCodes.map(code => <option key={code} value={code}>{code === 'All' ? 'All Projects' : code}</option>)}
+                   </select>
                 </FilterSection>
 
                 <FilterSection title="Document Type" icon={<DocumentIcon className="w-5 h-5" />}>
@@ -121,17 +142,26 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ documents, users, on
 
                  <FilterSection title="People" icon={<UsersIcon className="w-5 h-5" />}>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">From (Uploader)</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Uploaded By</label>
                         <select value={uploaderFilter} onChange={e => setUploaderFilter(e.target.value)} className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 focus:ring-blue-500 focus:border-blue-500">
                             <option value="All">All Users</option>
                             {users.map(user => <option key={user.email} value={user.email}>{user.name}</option>)}
                         </select>
                     </div>
                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Approver</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assigned Approver</label>
                         <select value={approverFilter} onChange={e => setApproverFilter(e.target.value)} className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 focus:ring-blue-500 focus:border-blue-500">
                             <option value="All">Any Approver</option>
                             {users.map(user => <option key={user.email} value={user.email}>{user.name}</option>)}
+                        </select>
+                    </div>
+                     <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reviewer Role</label>
+                        <select value={reviewerRoleFilter} onChange={e => setReviewerRoleFilter(e.target.value as ReviewerRole | 'All')} className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="All">All Roles</option>
+                            <option value="Approver">Approver</option>
+                            <option value="Commenter">Commenter</option>
+                            <option value="Viewer">Viewer</option>
                         </select>
                     </div>
                 </FilterSection>

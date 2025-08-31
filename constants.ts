@@ -47,8 +47,8 @@ export const INITIAL_DOCUMENTS: Document[] = [
     ],
     password: 'password123',
     history: [
-      { status: 'In Review', date: '2023-10-26T10:05:00Z', user: USER_ALICE.name, comment: 'Initial review request.' },
-      { status: 'Approved', date: '2023-10-27T14:30:00Z', user: USER_BOB.name, comment: 'Looks good, approved.' },
+      { status: 'In Review', date: '2023-10-26T10:05:00Z', user: USER_ALICE.name, comment: 'Initial review request.', version: 1 },
+      { status: 'Approved', date: '2023-10-27T14:30:00Z', user: USER_BOB.name, comment: 'Looks good, approved.', version: 1 },
     ],
     projectCode: 'PNX-001',
     version: 1,
@@ -67,7 +67,7 @@ export const INITIAL_DOCUMENTS: Document[] = [
     ],
     password: 'password456',
     history: [
-      { status: 'In Review', date: '2023-10-28T11:25:00Z', user: USER_DAVID.name, comment: 'Please review the updated schematics.' },
+      { status: 'In Review', date: '2023-10-28T11:25:00Z', user: USER_DAVID.name, comment: 'Please review the updated schematics.', version: 1 },
     ],
     projectCode: 'NPT-002',
     version: 1,
@@ -85,8 +85,8 @@ export const INITIAL_DOCUMENTS: Document[] = [
     ],
     password: 'password789',
     history: [
-       { status: 'In Review', date: '2023-10-29T09:05:00Z', user: USER_BOB.name, comment: 'Final check before production.' },
-       { status: 'Rejected', date: '2023-10-29T16:45:00Z', user: USER_DAVID.name, comment: 'Incorrect voltage specifications on page 3. Please revise.' },
+       { status: 'In Review', date: '2023-10-29T09:05:00Z', user: USER_BOB.name, comment: 'Final check before production.', version: 1 },
+       { status: 'Rejected', date: '2023-10-29T16:45:00Z', user: USER_DAVID.name, comment: 'Incorrect voltage specifications on page 3. Please revise.', version: 1 },
     ],
     projectCode: 'TTN-003',
     version: 1,
@@ -105,7 +105,7 @@ export const INITIAL_DOCUMENTS: Document[] = [
     ],
     password: 'password101',
     history: [
-      { status: 'In Review', date: '2023-10-30T15:05:00Z', user: USER_CHARLIE.name, comment: 'Review of project milestones.' },
+      { status: 'In Review', date: '2023-10-30T15:05:00Z', user: USER_CHARLIE.name, comment: 'Review of project milestones.', version: 1 },
     ],
     projectCode: 'PNX-001',
     version: 1,

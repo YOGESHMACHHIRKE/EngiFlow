@@ -1,4 +1,4 @@
-export type DocumentStatus = 'Approved' | 'Rejected' | 'In Review';
+export type DocumentStatus = 'Approved' | 'Rejected' | 'In Review' | 'Commented';
 
 export type View = 'dashboard' | 'documents' | 'detail' | 'profile' | 'projects' | 'search';
 
@@ -21,6 +21,7 @@ export interface HistoryEntry {
   date: string;
   user: string;
   comment: string;
+  version: number;
 }
 
 export interface Project {
@@ -47,4 +48,5 @@ export interface Document {
   projectCode?: string;
   version: number;
   isLatest: boolean;
+  fileUrl?: string;
 }

@@ -17,6 +17,7 @@ interface UploadModalProps {
 
 const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument, currentUser, projects, projectCode }) => {
   const [file, setFile] = useState<File | null>(null);
+  const [fileDataUrl, setFileDataUrl] = useState<string | null>(null);
   const [selectedProjectCode, setSelectedProjectCode] = useState(projectCode || '');
   const [reviewers, setReviewers] = useState<Reviewer[]>([]);
   const [reviewerEmail, setReviewerEmail] = useState('');
@@ -40,8 +41,16 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument, curre
   }, [onClose]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFile(e.target.files[0]);
+    if (e.target.files && e.target.files[0]) {
+      const currentFile = e.target.files[0];
+      setFile(currentFile);
+      setFileDataUrl(null);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFileDataUrl(reader.result as string);
+      };
+      reader.readAsDataURL(currentFile);
     }
   };
 
@@ -68,7 +77,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument, curre
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || reviewers.length === 0 || !selectedProjectCode) {
+    if (!file || !fileDataUrl || reviewers.length === 0 || !selectedProjectCode) {
         alert("Please fill all required fields: File, Project, and at least one Reviewer.");
         return;
     }
@@ -83,6 +92,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument, curre
       reviewers,
       password: password,
       projectCode: selectedProjectCode,
+      fileUrl: fileDataUrl,
     };
 
     try {

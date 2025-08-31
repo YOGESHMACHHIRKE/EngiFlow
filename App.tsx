@@ -167,6 +167,7 @@ const App: React.FC = () => {
         date: new Date().toISOString(),
         user: currentUser.name,
         comment: `[E-signed] ${comment || `Status changed to ${status}`}`,
+        version: docToUpdate.version,
       };
       
       setDocuments(docs =>
@@ -176,15 +177,19 @@ const App: React.FC = () => {
       );
     } else if (eSignAction.type === 'comment') {
       const { docId, comment } = eSignAction;
+      const userRole = docToUpdate.reviewers.find(r => r.email === currentUser.email)?.role;
+      const newStatus = userRole === 'Commenter' ? 'Commented' : docToUpdate.status;
+
       const newHistoryEntry: HistoryEntry = {
-        status: docToUpdate.status,
+        status: newStatus,
         date: new Date().toISOString(),
         user: currentUser.name,
         comment: `[E-signed] ${comment}`,
+        version: docToUpdate.version,
       };
       setDocuments(docs =>
         docs.map(doc =>
-          doc.id === docId ? { ...doc, history: [...doc.history, newHistoryEntry] } : doc
+          doc.id === docId ? { ...doc, status: newStatus, history: [...doc.history, newHistoryEntry] } : doc
         )
       );
     }
@@ -197,7 +202,14 @@ const App: React.FC = () => {
         ];
         const uniqueParticipants = [...new Set(participants)];
 
-        const notificationStatus = eSignAction.type === 'statusUpdate' ? eSignAction.status : docToUpdate.status;
+        let notificationStatus: DocumentStatus;
+        if (eSignAction.type === 'statusUpdate') {
+            notificationStatus = eSignAction.status;
+        } else { // 'comment'
+            const userRole = docToUpdate.reviewers.find(r => r.email === currentUser.email)?.role;
+            notificationStatus = userRole === 'Commenter' ? 'Commented' : docToUpdate.status;
+        }
+
         const notificationComment = eSignAction.comment;
 
         const emailContent = await generateStatusUpdateEmail(
@@ -246,6 +258,7 @@ const App: React.FC = () => {
           date: new Date().toISOString(),
           user: newDocumentData.uploadedBy.name,
           comment: `Document v${newVersion} created and sent for review.`,
+          version: newVersion,
         },
       ],
       version: newVersion,
@@ -374,7 +387,7 @@ const App: React.FC = () => {
       case 'profile':
         return <Profile currentUser={currentUser} onUpdateUser={handleUpdateUser} />;
       case 'search':
-        return <GlobalSearch documents={documents} users={users} onSelectDocument={handleSelectDocument} />;
+        return <GlobalSearch documents={documents} users={users} projects={projects} onSelectDocument={handleSelectDocument} />;
       default:
         return null;
     }

@@ -9,18 +9,22 @@ import { ImageIcon } from './icons/ImageIcon';
 interface InlineFileViewerProps {
   documentType: string;
   documentName: string;
+  fileUrl?: string;
 }
 
-export const InlineFileViewer: React.FC<InlineFileViewerProps> = ({ documentType, documentName }) => {
+export const InlineFileViewer: React.FC<InlineFileViewerProps> = ({ documentType, documentName, fileUrl }) => {
   const renderPreview = () => {
     const type = documentType.toUpperCase();
     const clickableWrapperClasses = "block cursor-pointer transition-transform transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-blue-500/50 rounded-lg";
+
+    const pdfUrl = fileUrl || "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+    const imageUrl = fileUrl || `https://source.unsplash.com/random/1200x800?sig=${encodeURIComponent(documentName)}`;
 
     switch (type) {
       case 'PDF':
         return (
           <a
-            href="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+            href={pdfUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={clickableWrapperClasses}
@@ -39,7 +43,7 @@ export const InlineFileViewer: React.FC<InlineFileViewerProps> = ({ documentType
       case 'GIF':
         return (
           <a
-            href={`https://source.unsplash.com/random/1200x800?sig=${encodeURIComponent(documentName)}`}
+            href={imageUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={clickableWrapperClasses}
@@ -51,7 +55,7 @@ export const InlineFileViewer: React.FC<InlineFileViewerProps> = ({ documentType
               <p className="text-gray-600 dark:text-gray-400 mt-2">Click to open full image in a new tab.</p>
               <div className="mt-4 w-full aspect-video flex items-center justify-center">
                 <img
-                  src={`https://source.unsplash.com/random/800x600?sig=${encodeURIComponent(documentName)}`}
+                  src={imageUrl}
                   alt={`Preview of ${documentName}`}
                   className="rounded-lg shadow-md max-h-full max-w-full object-contain"
                 />

@@ -34,6 +34,7 @@ const statusStyles: { [key in DocumentStatus]: { bg: string; text: string; dot: 
   'Approved': { bg: 'bg-green-100 dark:bg-green-900', text: 'text-green-800 dark:text-green-200', dot: 'bg-green-500' },
   'Rejected': { bg: 'bg-red-100 dark:bg-red-900', text: 'text-red-800 dark:text-red-200', dot: 'bg-red-500' },
   'In Review': { bg: 'bg-amber-100 dark:bg-amber-900', text: 'text-amber-800 dark:text-amber-200', dot: 'bg-amber-500' },
+  'Commented': { bg: 'bg-violet-100 dark:bg-violet-900', text: 'text-violet-800 dark:text-violet-200', dot: 'bg-violet-500' },
 };
 
 export const DocumentDetail: React.FC<DocumentDetailProps> = ({ document, onUpdateStatus, onAddComment, onSetReminder, currentUser, users, revisions, onSelectRevision }) => {
@@ -136,7 +137,7 @@ export const DocumentDetail: React.FC<DocumentDetailProps> = ({ document, onUpda
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
       {/* Left Column: File Viewer */}
       <div className="lg:col-span-3">
-        <InlineFileViewer documentType={document.type} documentName={document.name} />
+        <InlineFileViewer documentType={document.type} documentName={document.name} fileUrl={document.fileUrl} />
       </div>
 
       {/* Right Column: Details & Actions */}
@@ -302,7 +303,12 @@ export const DocumentDetail: React.FC<DocumentDetailProps> = ({ document, onUpda
                                 </div>
                             </div>
                             <p className="text-sm text-gray-600 dark:text-gray-400 break-words mt-1">{displayComment}</p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{new Date(entry.date).toLocaleString()}</p>
+                            <div className="flex items-center justify-between mt-1">
+                               <p className="text-xs text-gray-400 dark:text-gray-500">{new Date(entry.date).toLocaleString()}</p>
+                                <span className="text-xs font-semibold px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">
+                                    Version {entry.version}
+                                </span>
+                            </div>
                         </div>
                       </div>
                     </div>

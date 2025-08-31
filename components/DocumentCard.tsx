@@ -19,6 +19,7 @@ const statusStyles: { [key in DocumentStatus]: { bg: string; text: string; dot: 
   'Approved': { bg: 'bg-green-100 dark:bg-green-900', text: 'text-green-800 dark:text-green-200', dot: 'bg-green-500' },
   'Rejected': { bg: 'bg-red-100 dark:bg-red-900', text: 'text-red-800 dark:text-red-200', dot: 'bg-red-500' },
   'In Review': { bg: 'bg-amber-100 dark:bg-amber-900', text: 'text-amber-800 dark:text-amber-200', dot: 'bg-amber-500' },
+  'Commented': { bg: 'bg-violet-100 dark:bg-violet-900', text: 'text-violet-800 dark:text-violet-200', dot: 'bg-violet-500' },
 };
 
 const getIconForFileType = (type: string) => {
@@ -52,7 +53,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onSelect }
           <div className="flex items-center">
             <h4 className="font-semibold text-gray-900 dark:text-white truncate" title={document.name}>{document.name}</h4>
             {document.version > 1 && (
-                <span className="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                <span className="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                     v{document.version}
                 </span>
             )}

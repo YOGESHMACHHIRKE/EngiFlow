@@ -14,6 +14,7 @@ interface DashboardProps {
 const COLORS: { [key in DocumentStatus]: string } = {
   'Approved': '#22c55e', // green-500
   'In Review': '#f59e0b', // amber-500
+  'Commented': '#8b5cf6', // violet-500
   'Rejected': '#ef4444', // red-500
 };
 
@@ -21,10 +22,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ documents, onViewDocument,
   const stats = useMemo(() => {
     return documents.reduce(
       (acc, doc) => {
+        if (!acc[doc.status]) acc[doc.status] = 0;
         acc[doc.status]++;
         return acc;
       },
-      { 'Approved': 0, 'In Review': 0, 'Rejected': 0 }
+      { 'Approved': 0, 'In Review': 0, 'Rejected': 0, 'Commented': 0 }
     );
   }, [documents]);
 
@@ -56,10 +58,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ documents, onViewDocument,
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
         <StatCard title="Total Documents" value={documents.length} color="#3b82f6" />
         <StatCard title="Approved" value={stats['Approved']} color={COLORS['Approved']} />
         <StatCard title="In Review" value={stats['In Review']} color={COLORS['In Review']} />
+        <StatCard title="Commented" value={stats['Commented']} color={COLORS['Commented']} />
         <StatCard title="Rejected" value={stats['Rejected']} color={COLORS['Rejected']} />
       </div>
 
