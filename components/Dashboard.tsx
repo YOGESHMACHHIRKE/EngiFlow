@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import type { Document, DocumentStatus } from '../types';
 import { DocumentCard } from './DocumentCard';
+import { BellIcon } from './icons/BellIcon';
+import { CalendarIcon } from './icons/CalendarIcon';
 
 interface DashboardProps {
   documents: Document[];
@@ -35,8 +37,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ documents, onViewDocument,
   const recentDocuments = useMemo(() => {
     return [...documents]
       .sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime())
-      .slice(0, 3);
+      .slice(0, 5);
   }, [documents]);
+
+  const upcomingReminders = useMemo(() => {
+    return documents
+      .filter(doc => doc.status === 'In Review' && doc.reminderDate)
+      .sort((a, b) => new Date(a.reminderDate!).getTime() - new Date(b.reminderDate!).getTime());
+  }, [documents]);
+
 
   const StatCard: React.FC<{ title: string; value: number; color: string }> = ({ title, value, color }) => (
     <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md flex flex-col items-center justify-center">
@@ -55,40 +64,63 @@ export const Dashboard: React.FC<DashboardProps> = ({ documents, onViewDocument,
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        <div className="lg:col-span-2 bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md">
-          <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Document Status Overview</h3>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={110}
-                  fill="#8884d8"
-                  dataKey="value"
-                  nameKey="name"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[entry.name]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: theme === 'dark' ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-                    borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db',
-                    color: theme === 'dark' ? '#f3f4f6' : '#1f2937',
-                    borderRadius: '0.5rem',
-                  }}
-                />
-                <Legend
-                  formatter={(value, entry) => (
-                    <span style={{ color: theme === 'dark' ? '#d1d5db' : '#374151' }}>{value}</span>
-                  )}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+        <div className="lg:col-span-2 flex flex-col gap-8">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Document Status Overview</h3>
+            <div style={{ width: '100%', height: 250 }}>
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={90}
+                    fill="#8884d8"
+                    dataKey="value"
+                    nameKey="name"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[entry.name]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: theme === 'dark' ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                      borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db',
+                      color: theme === 'dark' ? '#f3f4f6' : '#1f2937',
+                      borderRadius: '0.5rem',
+                    }}
+                  />
+                  <Legend
+                    formatter={(value) => (
+                      <span style={{ color: theme === 'dark' ? '#d1d5db' : '#374151' }}>{value}</span>
+                    )}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+           <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-md">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Upcoming Reminders</h3>
+             <div className="space-y-3 max-h-60 overflow-y-auto">
+                {upcomingReminders.length > 0 ? (
+                    upcomingReminders.map(doc => (
+                        <div key={doc.id} onClick={() => onViewDocument(doc.id)} className="p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors">
+                           <p className="font-semibold text-gray-800 dark:text-gray-200 truncate">{doc.name}</p>
+                           <p className="flex items-center text-sm text-amber-600 dark:text-amber-400 mt-1">
+                             <CalendarIcon className="w-4 h-4 mr-1.5"/>
+                             Due: {new Date(doc.reminderDate!).toLocaleDateString()}
+                           </p>
+                        </div>
+                    ))
+                ) : (
+                    <div className="flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 py-8">
+                      <BellIcon className="w-10 h-10 mb-2"/>
+                      <p>No reminders set.</p>
+                    </div>
+                )}
+            </div>
           </div>
         </div>
 

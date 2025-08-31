@@ -2,13 +2,16 @@ import React, { useState, useMemo } from 'react';
 import type { Document } from '../types';
 import { DocumentCard } from './DocumentCard';
 import { SearchIcon } from './icons/SearchIcon';
+import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 
 interface DocumentListProps {
   documents: Document[];
   onSelectDocument: (docId: string) => void;
+  projectName?: string;
+  onBackToProjects?: () => void;
 }
 
-export const DocumentList: React.FC<DocumentListProps> = ({ documents, onSelectDocument }) => {
+export const DocumentList: React.FC<DocumentListProps> = ({ documents, onSelectDocument, projectName, onBackToProjects }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredDocuments = useMemo(() => {
@@ -22,9 +25,18 @@ export const DocumentList: React.FC<DocumentListProps> = ({ documents, onSelectD
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
-      <div className="mb-6">
-        <label htmlFor="search-documents" className="sr-only">Search Documents</label>
-        <div className="relative">
+      <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        {projectName && onBackToProjects && (
+          <button
+            onClick={onBackToProjects}
+            className="flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            <ArrowLeftIcon className="w-4 h-4 mr-2" />
+            Back to Projects
+          </button>
+        )}
+        <div className="relative flex-grow">
+          <label htmlFor="search-documents" className="sr-only">Search Documents</label>
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <SearchIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </div>

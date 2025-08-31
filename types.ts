@@ -1,6 +1,6 @@
 export type DocumentStatus = 'Approved' | 'Rejected' | 'In Review';
 
-export type View = 'dashboard' | 'documents' | 'detail';
+export type View = 'dashboard' | 'documents' | 'detail' | 'profile' | 'projects' | 'search';
 
 export type ReviewerRole = 'Approver' | 'Commenter' | 'Viewer';
 
@@ -12,6 +12,8 @@ export interface Reviewer {
 export interface User {
   name: string;
   email: string;
+  password?: string;
+  photoUrl?: string;
 }
 
 export interface HistoryEntry {
@@ -21,9 +23,19 @@ export interface HistoryEntry {
   comment: string;
 }
 
-export interface Document {
+export interface Project {
   id: string;
   name: string;
+  description: string;
+  lastUpdated: string;
+  projectCode: string;
+}
+
+export type NewProjectData = Omit<Project, 'id' | 'lastUpdated'>;
+
+export interface Document {
+  id: string;
+  name:string;
   type: string;
   uploadedBy: User;
   uploadDate: string;
@@ -31,4 +43,8 @@ export interface Document {
   reviewers: Reviewer[];
   password?: string;
   history: HistoryEntry[];
+  reminderDate?: string;
+  projectCode?: string;
+  version: number;
+  isLatest: boolean;
 }

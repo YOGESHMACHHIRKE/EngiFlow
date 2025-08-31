@@ -1,58 +1,51 @@
-import type { Reviewer, DocumentStatus } from '../types';
+import { GoogleGenAI } from "@google/genai";
+import type { Reviewer, DocumentStatus, HistoryEntry } from '../types';
 
-// This is a MOCK service. In a real application, this would be a backend service
-// that securely calls the GoogleGenAI API. We are simulating the API call here
-// to avoid exposing API keys on the client-side and to adhere to the project constraints.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 /**
- * Simulates a call to the Gemini API to generate a professional email
- * notifying reviewers about a new document.
+ * Generates a professional email notifying reviewers about a new document using the Gemini API.
  * 
  * @param documentName The name of the document to be reviewed.
  * @param reviewers A list of reviewer objects with email and role.
+ * @param projectName An optional project name for context.
  * @returns A promise that resolves to a formatted email string.
  */
 export const generateReviewEmail = async (
   documentName: string,
-  reviewers: Reviewer[]
+  reviewers: Reviewer[],
+  projectName?: string
 ): Promise<string> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-
-  // In a real implementation, you would use the Gemini API.
-  
-  // Mocked response for demonstration purposes
-  const subject = `Subject: Action Required: Document Review - ${documentName}`;
   const reviewerDetails = reviewers.map(r => `- ${r.email} (Role: ${r.role})`).join('\n');
+  const projectLine = projectName ? `Project: ${projectName}` : '';
   
-  const body = `
-Dear Review Team,
-
-This is an automated notification to inform you that the document "${documentName}" has been uploaded to the EngiFlow platform and requires your attention.
-
-Please log in to the system to access the document and take the appropriate action based on your assigned role.
-
-Assigned Reviewers:
+  const prompt = `Generate a professional email to notify a team about a new document for review.
+The document is named "${documentName}".
+${projectLine ? `It's part of the project: "${projectName}".` : ''}
+The reviewers are:
 ${reviewerDetails}
 
-Your prompt attention to this matter is greatly appreciated.
+The email should have a clear subject line.
+The body should inform them the document requires their attention on the EngiFlow platform and state their roles.
+Keep it professional and concise. Sign off as "EngiFlow System".
+Output only the full email content, including a subject line like "Subject: ...".`;
 
-Thank you,
-EngiFlow System
-  `;
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+  });
 
-  return `${subject}\n\n${body}`;
+  return response.text;
 };
 
 /**
- * Simulates a call to the Gemini API to generate an email notifying all participants
- * about a status change on a document.
+ * Generates an email notifying all participants about a status change on a document using the Gemini API.
  * 
  * @param documentName The name of the document.
  * @param status The new status of the document.
  * @param updatedBy The name of the user who made the change.
  * @param comment An optional comment with the status change.
- * @param participants A list of email addresses to be notified.
+ * @param participants A list of email addresses of participants (for context).
  * @returns A promise that resolves to a formatted email string.
  */
 export const generateStatusUpdateEmail = async (
@@ -62,32 +55,46 @@ export const generateStatusUpdateEmail = async (
   comment: string | undefined,
   participants: string[]
 ): Promise<string> => {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // In a real implementation, you would use the Gemini API.
-
-    // Mocked response for demonstration
-    const subject = `Subject: Status Update for Document: "${documentName}" is now ${status}`;
-    const body = `
-Hello Team,
-
-This email is to notify you of a status change for the document "${documentName}".
-
+    const prompt = `Generate a professional email to notify participants about a status update for a document.
+Document Name: "${documentName}"
 New Status: ${status}
 Updated By: ${updatedBy}
 Date: ${new Date().toLocaleString()}
+Comment: ${comment || 'No comment was provided.'}
 
-Comment:
-${comment || 'No comment was provided.'}
+The email should have a clear subject line indicating the document and its new status.
+The body should summarize the update details.
+Sign off as "The EngiFlow System".
+Output only the full email content, including a subject line like "Subject: ...".`;
 
-You can view the document and its full history on the EngiFlow platform.
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+    });
+    
+    return response.text;
+};
 
-Regards,
-The EngiFlow System
-    `;
+/**
+ * Generates a summary of a document based on its name and history using the Gemini API.
+ *
+ * @param documentName The name of the document.
+ * @param history The review history of the document.
+ * @returns A promise that resolves to a summary string.
+ */
+export const generateDocumentSummary = async (
+  documentName: string,
+  history: HistoryEntry[]
+): Promise<string> => {
+  const prompt = `Summarize the following document's activity. The document is named "${documentName}".
+Its review history is: ${JSON.stringify(history, null, 2)}.
+Provide a brief, professional summary of the document's journey, key activities, and its current state based on the history.
+Focus on the flow of statuses, who performed the actions, and any significant comments. Keep it to a few sentences.`;
+  
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+  });
 
-    // In a real app, you'd send this to the `participants` emails.
-    // For now, we'll just return the content to be displayed in an alert.
-    return `${subject}\n\n${body}`;
+  return response.text;
 };

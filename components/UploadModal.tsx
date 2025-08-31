@@ -1,19 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { Document, Reviewer, ReviewerRole, User } from '../types';
+import type { Document, Reviewer, ReviewerRole, User, Project } from '../types';
 import { generateReviewEmail } from '../services/geminiService';
 import { UploadIcon } from './icons/UploadIcon';
 import { MailIcon } from './icons/MailIcon';
 import { LockIcon } from './icons/LockIcon';
 import { TrashIcon } from './icons/TrashIcon';
+import { ProjectIcon } from './icons/ProjectIcon';
 
 interface UploadModalProps {
   onClose: () => void;
-  onAddDocument: (newDocument: Omit<Document, 'id' | 'history' | 'status'>) => void;
+  onAddDocument: (newDocument: Omit<Document, 'id' | 'history' | 'status' | 'version' | 'isLatest'>) => void;
   currentUser: User;
+  projects: Project[];
+  projectCode?: string | null;
 }
 
-const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument, currentUser }) => {
+const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument, currentUser, projects, projectCode }) => {
   const [file, setFile] = useState<File | null>(null);
+  const [selectedProjectCode, setSelectedProjectCode] = useState(projectCode || '');
   const [reviewers, setReviewers] = useState<Reviewer[]>([]);
   const [reviewerEmail, setReviewerEmail] = useState('');
   const [reviewerRole, setReviewerRole] = useState<ReviewerRole>('Approver');
@@ -64,17 +68,21 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument, curre
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || reviewers.length === 0) return;
+    if (!file || reviewers.length === 0 || !selectedProjectCode) {
+        alert("Please fill all required fields: File, Project, and at least one Reviewer.");
+        return;
+    }
 
     setIsLoading(true);
 
-    const newDocument: Omit<Document, 'id' | 'history' | 'status'> = {
+    const newDocument: Omit<Document, 'id' | 'history' | 'status' | 'version' | 'isLatest'> = {
       name: file.name,
       type: file.name.split('.').pop()?.toUpperCase() || 'FILE',
       uploadedBy: currentUser,
       uploadDate: new Date().toISOString(),
       reviewers,
       password: password,
+      projectCode: selectedProjectCode,
     };
 
     try {
@@ -99,25 +107,44 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument, curre
             <div className="p-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Upload New Document</h2>
               
-              <div className="mb-6">
-                <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Document File</label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md">
-                  <div className="space-y-1 text-center">
-                    <UploadIcon className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="flex text-sm text-gray-600 dark:text-gray-400">
-                      <label htmlFor="file-upload" className="relative cursor-pointer bg-white dark:bg-gray-900 rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                        <span>{file ? file.name : 'Upload a file'}</span>
-                        <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} required />
-                      </label>
-                      <p className="pl-1">{!file && 'or drag and drop'}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Document File *</label>
+                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md h-full">
+                    <div className="space-y-1 text-center flex flex-col justify-center">
+                      <UploadIcon className="mx-auto h-12 w-12 text-gray-400" />
+                      <div className="flex text-sm text-gray-600 dark:text-gray-400">
+                        <label htmlFor="file-upload" className="relative cursor-pointer bg-white dark:bg-gray-900 rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                          <span className="truncate max-w-xs block">{file ? file.name : 'Upload a file'}</span>
+                          <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} required />
+                        </label>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-500">or drag and drop</p>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-500">PDF, DWG, DOCX, XLSX up to 25MB</p>
                   </div>
+                </div>
+                 <div>
+                    <label htmlFor="project-select" className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <ProjectIcon className="w-4 h-4 mr-2"/>
+                        Project *
+                    </label>
+                    <select
+                        id="project-select"
+                        value={selectedProjectCode}
+                        onChange={(e) => setSelectedProjectCode(e.target.value)}
+                        className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        required
+                    >
+                        <option value="" disabled>Select a project</option>
+                        {projects.map(p => (
+                            <option key={p.id} value={p.projectCode}>{p.name} ({p.projectCode})</option>
+                        ))}
+                    </select>
                 </div>
               </div>
 
               <div className="mb-6">
-                <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"><MailIcon className="w-4 h-4 mr-2"/>Reviewers</label>
+                <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"><MailIcon className="w-4 h-4 mr-2"/>Reviewers *</label>
                 <div className="flex items-center space-x-2">
                   <input
                     type="email"
@@ -137,7 +164,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument, curre
                   </select>
                   <button type="button" onClick={handleAddReviewer} className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Add</button>
                 </div>
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 space-y-2 max-h-24 overflow-y-auto">
                   {reviewers.map(r => (
                     <div key={r.email} className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-2 rounded-md">
                       <div>
