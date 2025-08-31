@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import type { Document, DocumentStatus } from '../types';
@@ -7,6 +6,7 @@ import { DocumentCard } from './DocumentCard';
 interface DashboardProps {
   documents: Document[];
   onViewDocument: (docId: string) => void;
+  theme: 'light' | 'dark';
 }
 
 const COLORS: { [key in DocumentStatus]: string } = {
@@ -15,7 +15,7 @@ const COLORS: { [key in DocumentStatus]: string } = {
   'Rejected': '#ef4444', // red-500
 };
 
-export const Dashboard: React.FC<DashboardProps> = ({ documents, onViewDocument }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ documents, onViewDocument, theme }) => {
   const stats = useMemo(() => {
     return documents.reduce(
       (acc, doc) => {
@@ -26,11 +26,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ documents, onViewDocument 
     );
   }, [documents]);
 
-  const chartData = [
-    { name: 'Approved', value: stats['Approved'] },
-    { name: 'In Review', value: stats['In Review'] },
-    { name: 'Rejected', value: stats['Rejected'] },
-  ].filter(item => item.value > 0);
+  const chartData = useMemo(() => {
+    return (Object.entries(stats) as [DocumentStatus, number][])
+      .map(([name, value]) => ({ name, value }))
+      .filter(item => item.value > 0);
+  }, [stats]);
 
   const recentDocuments = useMemo(() => {
     return [...documents]
@@ -71,11 +71,22 @@ export const Dashboard: React.FC<DashboardProps> = ({ documents, onViewDocument 
                   nameKey="name"
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[entry.name as DocumentStatus]} />
+                    <Cell key={`cell-${index}`} fill={COLORS[entry.name]} />
                   ))}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: theme === 'dark' ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                    borderColor: theme === 'dark' ? '#4b5563' : '#d1d5db',
+                    color: theme === 'dark' ? '#f3f4f6' : '#1f2937',
+                    borderRadius: '0.5rem',
+                  }}
+                />
+                <Legend
+                  formatter={(value, entry) => (
+                    <span style={{ color: theme === 'dark' ? '#d1d5db' : '#374151' }}>{value}</span>
+                  )}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>

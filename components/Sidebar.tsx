@@ -59,21 +59,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
           </ul>
         </nav>
       </div>
-       <div className="p-4 border-t dark:border-gray-700">
-          <ul>
-            <NavItem
-              icon={<SettingsIcon className="w-6 h-6" />}
-              label="Settings"
-              isActive={false}
-              onClick={() => {}}
-            />
-             <NavItem
-              icon={<LogoutIcon className="w-6 h-6" />}
-              label="Logout"
-              isActive={false}
-              onClick={() => {}}
-            />
-          </ul>
+       <div>
+          <div className="p-4 border-t dark:border-gray-700">
+            <ul>
+              <NavItem
+                icon={<SettingsIcon className="w-6 h-6" />}
+                label="Settings"
+                isActive={false}
+                onClick={() => {}}
+              />
+               <NavItem
+                icon={<LogoutIcon className="w-6 h-6" />}
+                label="Logout"
+                isActive={false}
+                onClick={() => {}}
+              />
+            </ul>
+        </div>
+        <div className="p-4 border-t dark:border-gray-700 text-center text-xs text-gray-500 dark:text-gray-400">
+          <p>Version 1.0.0</p>
+          <p className="mt-1">&copy; {new Date().getFullYear()} Inlightsky Technologies private limited</p>
+        </div>
       </div>
     </aside>
   );

@@ -25,7 +25,7 @@ export interface Document {
   id: string;
   name: string;
   type: string;
-  uploadedBy: string;
+  uploadedBy: User;
   uploadDate: string;
   status: DocumentStatus;
   reviewers: Reviewer[];

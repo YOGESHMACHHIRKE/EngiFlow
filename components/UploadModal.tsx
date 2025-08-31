@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { Document, Reviewer, ReviewerRole } from '../types';
+import type { Document, Reviewer, ReviewerRole, User } from '../types';
 import { generateReviewEmail } from '../services/geminiService';
 import { UploadIcon } from './icons/UploadIcon';
 import { MailIcon } from './icons/MailIcon';
@@ -9,9 +9,10 @@ import { TrashIcon } from './icons/TrashIcon';
 interface UploadModalProps {
   onClose: () => void;
   onAddDocument: (newDocument: Omit<Document, 'id' | 'history' | 'status'>) => void;
+  currentUser: User;
 }
 
-const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument }) => {
+const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument, currentUser }) => {
   const [file, setFile] = useState<File | null>(null);
   const [reviewers, setReviewers] = useState<Reviewer[]>([]);
   const [reviewerEmail, setReviewerEmail] = useState('');
@@ -70,7 +71,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ onClose, onAddDocument }) => 
     const newDocument: Omit<Document, 'id' | 'history' | 'status'> = {
       name: file.name,
       type: file.name.split('.').pop()?.toUpperCase() || 'FILE',
-      uploadedBy: 'System Admin', // In a real app, this would be the logged-in user
+      uploadedBy: currentUser,
       uploadDate: new Date().toISOString(),
       reviewers,
       password: password,

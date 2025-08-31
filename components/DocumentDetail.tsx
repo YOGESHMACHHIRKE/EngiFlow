@@ -110,7 +110,7 @@ export const DocumentDetail: React.FC<DocumentDetailProps> = ({ document, onUpda
       </div>
       
       <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <DetailItem label="Uploaded By" value={document.uploadedBy} />
+        <DetailItem label="Uploaded By" value={document.uploadedBy.name} />
         <DetailItem label="Upload Date" value={new Date(document.uploadDate).toLocaleString()} />
         <DetailItem label="File Type" value={document.type} />
         <div className="md:col-span-2 lg:col-span-3">

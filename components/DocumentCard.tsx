@@ -29,7 +29,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onSelect }
         <div>
           <h4 className="font-semibold text-gray-900 dark:text-white truncate max-w-xs">{document.name}</h4>
           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1 space-x-4">
-            <span className="flex items-center"><UserIcon className="w-4 h-4 mr-1"/>{document.uploadedBy}</span>
+            <span className="flex items-center"><UserIcon className="w-4 h-4 mr-1"/>{document.uploadedBy.name}</span>
             <span className="flex items-center"><CalendarIcon className="w-4 h-4 mr-1"/>{new Date(document.uploadDate).toLocaleDateString()}</span>
           </div>
         </div>
