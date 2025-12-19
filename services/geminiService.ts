@@ -30,8 +30,9 @@ The body should inform them the document requires their attention on the EngiFlo
 Keep it professional and concise. Sign off as "EngiFlow System".
 Output only the full email content, including a subject line like "Subject: ...".`;
 
+  // Fix: Updated model to 'gemini-3-flash-preview' for basic text tasks
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3-flash-preview',
     contents: prompt,
   });
 
@@ -67,8 +68,9 @@ The body should summarize the update details.
 Sign off as "The EngiFlow System".
 Output only the full email content, including a subject line like "Subject: ...".`;
 
+    // Fix: Updated model to 'gemini-3-flash-preview' for basic text tasks
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: prompt,
     });
     
@@ -91,8 +93,47 @@ Its review history is: ${JSON.stringify(history, null, 2)}.
 Provide a brief, professional summary of the document's journey, key activities, and its current state based on the history.
 Focus on the flow of statuses, who performed the actions, and any significant comments. Keep it to a few sentences.`;
   
+  // Fix: Updated model to 'gemini-3-flash-preview' for basic text tasks
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: 'gemini-3-flash-preview',
+    contents: prompt,
+  });
+
+  return response.text;
+};
+
+/**
+ * Converts note content from HTML to a specified format using the Gemini API.
+ *
+ * @param title The title of the note.
+ * @param htmlContent The HTML content of the note.
+ * @param targetFormat The desired output format (e.g., 'markdown', 'plaintext').
+ * @returns A promise that resolves to the converted content string.
+ */
+export const convertNoteContent = async (
+  title: string,
+  htmlContent: string,
+  targetFormat: 'markdown' | 'plaintext'
+): Promise<string> => {
+  const formatDescription = {
+    markdown: 'GitHub Flavored Markdown. Preserve formatting like headings (if any), bold, italics, and lists.',
+    plaintext: 'Plain text. Remove all HTML tags and formatting, preserving line breaks for readability.',
+  };
+
+  const prompt = `Convert the following note content from HTML to ${targetFormat}.
+Note Title: "${title}"
+HTML Content:
+\`\`\`html
+${htmlContent}
+\`\`\`
+
+Instructions:
+- The output should be only the converted content, without any explanations or surrounding text.
+- Convert the content into ${formatDescription[targetFormat]}`;
+
+  // Fix: Updated model to 'gemini-3-flash-preview' for basic text tasks
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
     contents: prompt,
   });
 

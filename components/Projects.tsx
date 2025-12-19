@@ -1,5 +1,7 @@
+
+
 import React, { useState, useMemo } from 'react';
-import type { Project } from '../types';
+import type { Project, User } from '../types';
 import { ProjectCard } from './ProjectCard';
 import { GridIcon } from './icons/GridIcon';
 import { ListIcon } from './icons/ListIcon';
@@ -8,11 +10,14 @@ import { PlusIcon } from './icons/PlusIcon';
 
 interface ProjectsProps {
   projects: Project[];
+  currentUser: User;
   onSelectProject: (projectCode: string) => void;
   onAddNewProject: () => void;
+  onEditProject: (project: Project) => void;
+  onDeleteProject: (projectCode: string) => void;
 }
 
-export const Projects: React.FC<ProjectsProps> = ({ projects, onSelectProject, onAddNewProject }) => {
+export const Projects: React.FC<ProjectsProps> = ({ projects, currentUser, onSelectProject, onAddNewProject, onEditProject, onDeleteProject }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -44,13 +49,15 @@ export const Projects: React.FC<ProjectsProps> = ({ projects, onSelectProject, o
           />
         </div>
         <div className="flex items-center gap-4">
-          <button
-            onClick={onAddNewProject}
-            className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
-          >
-            <PlusIcon className="w-5 h-5 mr-2" />
-            New Project
-          </button>
+          {currentUser.role === 'Admin' && (
+            <button
+              onClick={onAddNewProject}
+              className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
+            >
+              <PlusIcon className="w-5 h-5 mr-2" />
+              New Project
+            </button>
+          )}
           <div className="flex items-center p-1 bg-gray-200 dark:bg-gray-700 rounded-lg">
             <button
               onClick={() => setViewMode('grid')}
@@ -83,7 +90,10 @@ export const Projects: React.FC<ProjectsProps> = ({ projects, onSelectProject, o
               key={project.id}
               project={project}
               viewMode={viewMode}
+              canDelete={currentUser.role === 'Admin'}
               onSelect={() => onSelectProject(project.projectCode)}
+              onEdit={() => onEditProject(project)}
+              onDelete={() => onDeleteProject(project.projectCode)}
             />
           ))}
         </div>
